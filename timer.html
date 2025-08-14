@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таймер рабочего дня (Москва)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .timer-container {
+            margin: 30px 0;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 30px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 1s;
+        }
+        .time-display {
+            font-size: 2.5em;
+            margin: 20px 0;
+            color: #333;
+        }
+        .percentage {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .moscow-time {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Таймер рабочего дня</h1>
+        <p>10:00 - 19:00 (Московское время)</p>
+        <div class="moscow-time" id="moscow-time"></div>
+        
+        <div class="timer-container">
+            <div class="time-display" id="current-time">00:00:00</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="percentage" id="percentage">0%</div>
+        </div>
+    </div>
+
+    <script>
+        function updateMoscowTime() {
+            const now = new Date();
+            
+            // Получаем текущее время в Москве (UTC+3)
+            const moscowOffset = 3 * 60 * 60 * 1000; // MSK (UTC+3)
+            const moscowTime = new Date(now.getTime() + moscowOffset);
+            
+            return moscowTime;
+        }
+
+        function updateTimer() {
+            const moscowTime = updateMoscowTime();
+            
+            // Отображаем текущее московское время
+            document.getElementById('moscow-time').textContent = 
+                `Текущее время в Москве: ${moscowTime.toLocaleTimeString('ru-RU')}`;
+            
+            // Устанавливаем время начала (10:00) и конца (19:00)
+            const startTime = new Date(moscowTime);
+            startTime.setHours(10, 0, 0, 0);
+            
+            const endTime = new Date(moscowTime);
+            endTime.setHours(19, 0, 0, 0);
+            
+            // Проверяем, находится ли текущее время в рабочем интервале
+            if (moscowTime < startTime) {
+                // До начала рабочего дня
+                const timeUntilStart = startTime - moscowTime;
+                const hours = Math.floor(timeUntilStart / (1000 * 60 * 60));
+                const minutes = Math.floor((timeUntilStart % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('current-time').textContent = 
+                    `До начала: ${hours}ч ${minutes}м`;
+                document.getElementById('progress-bar').style.width = "0%";
+                document.getElementById('percentage').textContent = "0%";
+            } else if (moscowTime > endTime) {
+                // После окончания рабочего дня
+                document.getElementById('current-time').textContent = "Рабочий день завершен";
+                document.getElementById('progress-bar').style.width = "100%";
+                document.getElementById('percentage').textContent = "100%";
+            } else {
+                // В течение рабочего дня
+                const totalDuration = endTime - startTime;
+                const elapsed = moscowTime - startTime;
+                const percentage = (elapsed / totalDuration) * 100;
+                
+                // Оставшееся время
+                const remaining = endTime - moscowTime;
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                
+                // Форматируем время
+                const timeString = [
+                    hours.toString().padStart(2, '0'),
+                    minutes.toString().padStart(2, '0'),
+                    seconds.toString().padStart(2, '0')
+                ].join(':');
+                
+                // Обновляем элементы на странице
+                document.getElementById('current-time').textContent = timeString;
+                document.getElementById('progress-bar').style.width = percentage + "%";
+                document.getElementById('percentage').textContent = percentage.toFixed(2) + "%";
+            }
+        }
+        
+        // Обновляем таймер каждую секунду
+        setInterval(updateTimer, 1000);
+        
+        // Инициализация при загрузке
+        updateTimer();
+    </script>
+</body>
+</html>
