@@ -72,7 +72,7 @@
             const now = new Date();
             
             // Получаем текущее время в Москве (UTC+3)
-            const moscowOffset = 3 * 60 * 60 * 1000; // MSK (UTC+3)
+            const moscowOffset = 0 * 60 * 60 * 1000; // MSK (UTC+3)
             const moscowTime = new Date(now.getTime() + moscowOffset);
             
             return moscowTime;
